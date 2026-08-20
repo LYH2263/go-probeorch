@@ -42,6 +42,6 @@ func toView(t target.Target, rate float64) TargetView {
 		LastOK:      t.LastOK,
 		LastAt:      t.LastAt,
 		SuccessRate: rate,
-		Tags:        append([]string(nil), t.Tags...),
+		Tags:        t.Tags, // BUG: 与内部共享 Tags
 	}
 }
