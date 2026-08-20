@@ -44,8 +44,7 @@ func (p *HTTPProber) Probe(ctx context.Context, req Request) Response {
 	if err != nil {
 		return Response{OK: false, Message: "do", Err: err}
 	}
-	// CLEAN: 必须关闭 Body
-	defer resp.Body.Close()
+	// BUG: 未 Close Body
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 	ok := resp.StatusCode == expect || (expect == 0 && resp.StatusCode >= 200 && resp.StatusCode < 300)
 	msg := strings.TrimSpace(resp.Status)
