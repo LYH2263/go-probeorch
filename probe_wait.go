@@ -17,7 +17,12 @@ func (sleepWaiter) Wait(ctx context.Context, d time.Duration) error {
 	if d <= 0 {
 		return nil
 	}
-	// BUG: 不听 ctx，固定 Sleep
-	time.Sleep(d)
-	return nil
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-t.C:
+		return nil
+	}
 }
