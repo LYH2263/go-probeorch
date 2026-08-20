@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>健康探测编排</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1>健康探测编排</h1>
+    <p>注册目标 · 手动探测 · 快照与成功率</p>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>目标列表</h2>
+      <p id="stats-line" class="muted">—</p>
+      <button type="button" id="btn-refresh" class="ghost">刷新</button>
+      <ul id="target-list"></ul>
+    </section>
+    <section class="panel">
+      <h2>注册目标</h2>
+      <form id="reg-form">
+        <input id="reg-name" placeholder="名称" required />
+        <input id="reg-addr" placeholder="http://127.0.0.1:8100/api/health" required />
+        <select id="reg-kind">
+          <option value="http">http</option>
+          <option value="tcp">tcp</option>
+        </select>
+        <input id="reg-interval" placeholder="间隔 30s" value="30s" />
+        <button type="submit">注册</button>
+      </form>
+      <pre id="reg-out" class="out"></pre>
+    </section>
+    <section class="panel">
+      <h2>手动探测</h2>
+      <form id="run-form">
+        <input id="run-id" placeholder="目标 ID" required />
+        <button type="submit">RunOnce</button>
+      </form>
+      <pre id="run-out" class="out"></pre>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
