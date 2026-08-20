@@ -16,7 +16,7 @@ func (o *Orch) Close() error {
 		o.sched.Clear()
 	}
 	o.rings = nil
-	o.probers = nil // 置空后 RunOnce 若未检查会 panic
+	o.probers = nil
 	o.customs = nil
 	return nil
 }

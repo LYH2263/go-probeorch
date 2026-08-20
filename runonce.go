@@ -28,7 +28,14 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 	}
 
 	o.mu.Lock()
-	// BUG: Close 后未先判 closed/probers，继续解引用
+	if err := o.checkOpenLocked(); err != nil {
+		o.mu.Unlock()
+		return Result{}, err
+	}
+	if o.probers == nil {
+		o.mu.Unlock()
+		return Result{}, ErrClosed
+	}
 	t, ok := o.reg.Get(id)
 	if !ok {
 		o.mu.Unlock()
