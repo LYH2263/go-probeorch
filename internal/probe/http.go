@@ -44,8 +44,13 @@ func (p *HTTPProber) Probe(ctx context.Context, req Request) Response {
 	if err != nil {
 		return Response{OK: false, Message: "do", Err: err}
 	}
-	// BUG: 未 Close Body
-	body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	if err != nil {
+		// 失败路径调用 DrainAndClose，但 plant 实现仍不 Close
+		DrainAndClose(resp.Body)
+		return Response{OK: false, Message: "read", Err: err}
+	}
+	// BUG: 成功路径漏 Close / 未调用 DrainAndClose
 	ok := resp.StatusCode == expect || (expect == 0 && resp.StatusCode >= 200 && resp.StatusCode < 300)
 	msg := strings.TrimSpace(resp.Status)
 	return Response{OK: ok, Status: resp.StatusCode, Message: msg, Detail: append([]byte(nil), body...)}
