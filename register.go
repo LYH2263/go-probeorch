@@ -59,17 +59,18 @@ func (o *Orch) Register(spec Spec) (string, error) {
 	if err := o.reg.Add(t); err != nil {
 		return "", err
 	}
-	// BUG: 先入调度表，持久化失败也不回滚
+	// CLEAN: 先持久化，失败则回滚注册，不进调度表
+	if o.persistPath != "" {
+		if err := o.persistLocked(); err != nil {
+			_ = o.reg.Remove(id)
+			return "", fmt.Errorf("%w: %v", ErrPersist, err)
+		}
+	}
 	if t.Enabled {
 		o.sched.Upsert(t.ID, t.NextDue)
 	}
 	o.rings.Ensure(id)
 	o.agg.Ensure(id)
-	if o.persistPath != "" {
-		if err := o.persistLocked(); err != nil {
-			return "", fmt.Errorf("%w: %v", ErrPersist, err)
-		}
-	}
 	return id, nil
 }
 
