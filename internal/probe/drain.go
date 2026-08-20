@@ -8,5 +8,5 @@ func DrainAndClose(body io.ReadCloser) {
 		return
 	}
 	_, _ = io.Copy(io.Discard, io.LimitReader(body, 64<<10))
-	// BUG: 只 Drain 不 Close，句柄仍占用
+	_ = body.Close()
 }
