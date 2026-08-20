@@ -147,8 +147,8 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 
 	out := toPublicResult(res)
 	if perr != nil {
-		// BUG: 结果回传再剥一层链，errors.Is(ErrProbeFailed) 失效
-		return out, fmt.Errorf("%v", wrapProbeErr(perr))
+		// 原样返回包裹后的 Cause，保留 ErrProbeFailed 链
+		return out, wrapProbeErr(perr)
 	}
 	return out, nil
 }
