@@ -28,7 +28,11 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 	}
 
 	o.mu.Lock()
-	// BUG: Close 后未先判 closed/probers，继续解引用
+	// CLEAN: Close 后探测入口直接返回 closed，不继续解引用/调度。
+	if err := o.checkOpenLocked(); err != nil {
+		o.mu.Unlock()
+		return Result{}, err
+	}
 	t, ok := o.reg.Get(id)
 	if !ok {
 		o.mu.Unlock()
