@@ -113,7 +113,7 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 		Latency:  lat,
 		Status:   status,
 		Message:  msg,
-		Detail:   detail, // BUG: 未深拷贝 Detail
+		Detail:   result.CloneBytes(detail),
 	}
 	if perr != nil {
 		res.OK = false
