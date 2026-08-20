@@ -20,7 +20,10 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	// BUG: 忽略 ctx 取消
+	// 入口响应取消：ctx 已取消则直接返回，不再进入探测流程。
+	if err := ctx.Err(); err != nil {
+		return Result{}, fmt.Errorf("%w: %v", ErrCanceled, err)
+	}
 
 	o.mu.Lock()
 	if err := o.checkOpenLocked(); err != nil {
@@ -57,7 +60,10 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 			return Result{}, fmt.Errorf("%w: %v", ErrCanceled, err)
 		}
 	}
-	// BUG: 等待后也不检查 ctx
+	// 等待后再检查 ctx，覆盖 delay==0 或等待期间被取消的场景。
+	if err := ctx.Err(); err != nil {
+		return Result{}, fmt.Errorf("%w: %v", ErrCanceled, err)
+	}
 
 	start := time.Now()
 	var (
