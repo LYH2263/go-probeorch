@@ -20,7 +20,12 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	// BUG: 忽略 ctx 取消
+	// CLEAN: 入口处响应取消
+	select {
+	case <-ctx.Done():
+		return Result{}, fmt.Errorf("%w: %v", ErrCanceled, ctx.Err())
+	default:
+	}
 
 	o.mu.Lock()
 	if err := o.checkOpenLocked(); err != nil {
@@ -57,7 +62,11 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 			return Result{}, fmt.Errorf("%w: %v", ErrCanceled, err)
 		}
 	}
-	// BUG: 等待后也不检查 ctx
+	select {
+	case <-ctx.Done():
+		return Result{}, fmt.Errorf("%w: %v", ErrCanceled, ctx.Err())
+	default:
+	}
 
 	start := time.Now()
 	var (
