@@ -79,7 +79,10 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 
 	switch kind {
 	case target.KindCustom:
-		// BUG: 未检查 custom==nil 直接调用
+		// 调用前拦住空函数：nil ProbeFunc 不应 panic，而应返回明确错误。
+		if custom == nil {
+			return Result{}, fmt.Errorf("%w: nil probe func", ErrNoProber)
+		}
 		okProbe, detail, perr = custom(ctx, addr, timeout)
 		msg = "custom"
 	default:
