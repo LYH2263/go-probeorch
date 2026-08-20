@@ -3,8 +3,7 @@ package target
 // Clone 深拷贝单个目标。
 func Clone(t Target) Target {
 	out := t
-	// BUG: Tags 不深拷贝
-	out.Tags = t.Tags
+	out.Tags = append([]string(nil), t.Tags...)
 	out.Detail = append([]byte(nil), t.Detail...)
 	if t.Headers != nil {
 		out.Headers = make(map[string]string, len(t.Headers))
