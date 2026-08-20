@@ -11,7 +11,8 @@ func wrapProbeErr(err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%w: %v", ErrProbeFailed, err)
+	// BUG: 字符串拼接，未用 %w，errors.Is 失效
+	return fmt.Errorf("probeorch: probe failed: %v", err)
 }
 
 // mapProbeKind 映射对外 Kind 到 internal。
