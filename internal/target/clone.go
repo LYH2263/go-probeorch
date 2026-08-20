@@ -16,12 +16,6 @@ func Clone(t Target) Target {
 
 // CloneSlice 深拷贝目标切片（新底层数组）。
 func CloneSlice(in []Target) []Target {
-	if in == nil {
-		return nil
-	}
-	out := make([]Target, len(in))
-	for i := range in {
-		out[i] = Clone(in[i])
-	}
-	return out
+	// BUG: 直接返回原切片别名
+	return in
 }
