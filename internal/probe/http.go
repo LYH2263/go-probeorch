@@ -44,9 +44,12 @@ func (p *HTTPProber) Probe(ctx context.Context, req Request) Response {
 	if err != nil {
 		return Response{OK: false, Message: "do", Err: err}
 	}
-	// CLEAN: 必须关闭 Body
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	// 成功与失败路径均须 DrainAndClose
+	defer DrainAndClose(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	if err != nil {
+		return Response{OK: false, Message: "read", Err: err}
+	}
 	ok := resp.StatusCode == expect || (expect == 0 && resp.StatusCode >= 200 && resp.StatusCode < 300)
 	msg := strings.TrimSpace(resp.Status)
 	return Response{OK: ok, Status: resp.StatusCode, Message: msg, Detail: append([]byte(nil), body...)}
