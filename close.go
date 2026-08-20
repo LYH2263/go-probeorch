@@ -7,15 +7,15 @@ func (o *Orch) Close() error {
 	if o.closed {
 		return nil
 	}
-	// BUG: 先丢结果环再 Flush，刷出空历史
+	// CLEAN: 先 Flush 再丢弃 rings / probers
+	if o.persistPath != "" && o.rings != nil {
+		_ = o.persistLocked()
+	}
 	o.closed = true
 	if o.sched != nil {
 		o.sched.Clear()
 	}
 	o.rings = nil
-	if o.persistPath != "" {
-		_ = o.persistLocked()
-	}
 	o.probers = nil
 	o.customs = nil
 	return nil
