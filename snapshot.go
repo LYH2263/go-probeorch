@@ -20,12 +20,10 @@ func (o *Orch) Snapshot() Snapshot {
 		return snap
 	}
 	list := o.reg.List()
-	// BUG: Tags 与内部共享；且复用 views 切片逻辑不当
+	// CLEAN: 拷贝切片与字段，避免别名
 	views := make([]TargetView, 0, len(list))
 	for _, t := range list {
-		v := toView(t, o.agg.Rate(t.ID))
-		v.Tags = t.Tags // 别名
-		views = append(views, v)
+		views = append(views, toView(t, o.agg.Rate(t.ID)))
 	}
 	snap.Targets = views
 	return snap
