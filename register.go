@@ -59,7 +59,6 @@ func (o *Orch) Register(spec Spec) (string, error) {
 	if err := o.reg.Add(t); err != nil {
 		return "", err
 	}
-	// BUG: 先入调度表，持久化失败也不回滚
 	if t.Enabled {
 		o.sched.Upsert(t.ID, t.NextDue)
 	}
@@ -67,6 +66,12 @@ func (o *Orch) Register(spec Spec) (string, error) {
 	o.agg.Ensure(id)
 	if o.persistPath != "" {
 		if err := o.persistLocked(); err != nil {
+			// 持久化失败：回滚本次注册，不得残留于调度表/注册表，
+			// 否则 Tick 仍会弹出到期目标。
+			o.sched.Remove(id)
+			o.rings.Drop(id)
+			o.agg.Drop(id)
+			_ = o.reg.Remove(id)
 			return "", fmt.Errorf("%w: %v", ErrPersist, err)
 		}
 	}
