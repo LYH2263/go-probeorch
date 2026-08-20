@@ -79,9 +79,7 @@ func (o *Orch) RunOnceContext(ctx context.Context, id string) (Result, error) {
 
 	switch kind {
 	case target.KindCustom:
-		if custom == nil {
-			return Result{}, ErrNoProber
-		}
+		// BUG: 未检查 custom==nil 直接调用
 		okProbe, detail, perr = custom(ctx, addr, timeout)
 		msg = "custom"
 	default:
